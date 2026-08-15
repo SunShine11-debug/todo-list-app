@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Todo List</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .container {
+    background: white;
+    width: 400px;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  .input-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  input {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+  }
+  input:focus { border-color: #764ba2; }
+  button {
+    background: #764ba2;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  button:hover { background: #667eea; }
+  ul { list-style: none; }
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    animation: fadeIn 0.3s ease;
+  }
+  li.done span { text-decoration: line-through; color: #aaa; }
+  li span { cursor: pointer; flex: 1; }
+  .delete-btn {
+    background: #ff6b6b;
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  .delete-btn:hover { background: #ff4747; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .empty-msg {
+    text-align: center;
+    color: #aaa;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📝 My Todo List</h1>
+  <div class="input-area">
+    <input type="text" id="taskInput" placeholder="Add a new task...">
+    <button onclick="addTask()">Add</button>
+  </div>
+  <ul id="taskList"></ul>
+  <p class="empty-msg" id="emptyMsg">No tasks yet. Add one above!</p>
+</div>
+
+<script>
+  const taskInput = document.getElementById('taskInput');
+  const taskList = document.getElementById('taskList');
+  const emptyMsg = document.getElementById('emptyMsg');
+
+  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+  function saveTasks() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
+
+  function renderTasks() {
+    taskList.innerHTML = '';
+    emptyMsg.style.display = tasks.length === 0 ? 'block' : 'none';
+
+    tasks.forEach((task, index) => {
+      const li = document.createElement('li');
+      if (task.done) li.classList.add('done');
+
+      const span = document.createElement('span');
+      span.textContent = task.text;
+      span.onclick = () => toggleTask(index);
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Delete';
+      delBtn.classList.add('delete-btn');
+      delBtn.onclick = () => deleteTask(index);
+
+      li.appendChild(span);
+      li.appendChild(delBtn);
+      taskList.appendChild(li);
+    });
+  }
+
+  function addTask() {
+    const text = taskInput.value.trim();
+    if (text === '') return;
+    tasks.push({ text: text, done: false });
+    taskInput.value = '';
+    saveTasks();
+    renderTasks();
+  }
+
+  function toggleTask(index) {
+    tasks[index].done = !tasks[index].done;
+    saveTasks();
+    renderTasks();
+  }
+
+  function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveTasks();
+    renderTasks();
+  }
+
+  taskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  renderTasks();
+</script>
+
+</body>
+</html>
